@@ -1,12 +1,27 @@
 (ns clj-webapp.web
-  (:require [ring.adapter.jetty :as jetty]
+  (:require [clj-webapp.core :as core]
+            [ring.adapter.jetty :as jetty]
+            [compojure.core :as web]
             [compojure.handler :as handler]
+            [compojure.route :as route]
+            [org.danlarkin.json :as json]
             [ring.middleware.file :as file]
             [ring.middleware.file-info :as file-info]
+            [ring.util.response :as response]
             [swank.swank :as swank]
             [clojure.tools.logging :as log]))
 
 (def *SERVER* (ref nil))
+(def *STORE* nil)
+
+(defn todos-handler [store]
+  (web/routes
+   (web/GET "/todos" {}
+            (-> (core/read-todos! store)
+                json/encode-to-str
+                response/response
+                (response/content-type "application/json")))
+   (route/not-found "not here")))
 
 (defn wrap-logging
   "Wraps with request logging."
@@ -25,7 +40,7 @@
         (log/warn (str "Failed request: " (format "[IP: %s] %s %s" remote-addr request-method uri) ", error: " (.getMessage e)))
         (throw e)))))
 
-(def app (handler/site (-> identity
+(def app (handler/site (-> (todos-handler *STORE*)
                            (file/wrap-file "static")
                            file-info/wrap-file-info
                            wrap-logging)))
