@@ -29,6 +29,14 @@
              (let [id (core/store-todo! store body (= done? "true"))
                    loc (format "%s://%s:%d/todos/%s" (name scheme) host port id)]
                (response/redirect-after-post loc)))
+   (web/GET "/todos/:id" [id]
+            (if-let [todo (core/read-todo! store id)]
+              (-> todo
+                  json/encode-to-str
+                  response/response
+                  (response/content-type "application/json"))
+              (response/status (response/response (str id " not found"))
+                               404)))
    (route/not-found "not here")))
 
 (defn wrap-logging

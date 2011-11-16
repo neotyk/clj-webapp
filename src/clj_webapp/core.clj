@@ -34,3 +34,9 @@
      (alter *STORE* assoc
             id {:body body :isDone done? }))
     id))
+
+(defn read-todo!
+  "Reads single todo from store"
+  [store id]
+  (when-let [m (get @store id)]
+    (assoc m :id id)))
