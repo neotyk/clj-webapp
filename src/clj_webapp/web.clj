@@ -8,9 +8,27 @@
 
 (def *SERVER* (ref nil))
 
+(defn wrap-logging
+  "Wraps with request logging."
+  [handler]
+  (fn [{:keys [remote-addr request-method uri] :as request}]
+    (log/info (format "[IP: %s] %s %s" remote-addr request-method uri))
+    (try
+      (let [start (.getTime (java.util.Date.))
+            response (handler request)
+            time (- (.getTime (java.util.Date.))
+                    start)]
+        (log/info (format "[IP: %s] %s %s, Result code: %d in: %d ms."
+                          remote-addr request-method uri (:status response) time))
+        response)
+      (catch Exception e
+        (log/warn (str "Failed request: " (format "[IP: %s] %s %s" remote-addr request-method uri) ", error: " (.getMessage e)))
+        (throw e)))))
+
 (def app (handler/site (-> identity
                            (file/wrap-file "static")
-                           file-info/wrap-file-info)))
+                           file-info/wrap-file-info
+                           wrap-logging)))
 
 (defn start-server []
   (log/info (str "Starting server on port #8040"))
