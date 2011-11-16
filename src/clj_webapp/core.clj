@@ -40,3 +40,10 @@
   [store id]
   (when-let [m (get @store id)]
     (assoc m :id id)))
+
+(defn remove-todo!
+  "Removes todo from the store"
+  [store id]
+  (when (contains? @store id)
+    (dosync
+     (alter store dissoc id))))

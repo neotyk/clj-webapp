@@ -37,6 +37,11 @@
                   (response/content-type "application/json"))
               (response/status (response/response (str id " not found"))
                                404)))
+   (web/DELETE "/todos/:id" [id]
+               (if (core/remove-todo! store id)
+                 (response/response "")
+                 (response/status (response/response (str "Failed to remove " id))
+                                  404)))
    (route/not-found "not here")))
 
 (defn wrap-logging
