@@ -1,4 +1,5 @@
-(ns clj-webapp.core)
+(ns clj-webapp.core
+  (:import (java.util UUID)))
 
 (def *STORE* (ref {}))
 
@@ -24,3 +25,12 @@
   [store]
   (reverse (into [] (for [[k v] @store]
                       (assoc v :id k)))))
+
+(defn store-todo!
+  "Store new todo and return id of it"
+  [store body done?]
+  (let [id (str (UUID/randomUUID))]
+    (dosync
+     (alter *STORE* assoc
+            id {:body body :isDone done? }))
+    id))

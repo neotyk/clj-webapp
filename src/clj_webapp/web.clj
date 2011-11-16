@@ -20,6 +20,15 @@
                 json/encode-to-str
                 response/response
                 (response/content-type "application/json")))
+   (web/POST "/todos" {{body "todo[body]"
+                        done? "todo[isDone]"
+                        :as params} :form-params
+                       scheme :scheme
+                       host :server-name
+                       port :server-port}
+             (let [id (core/store-todo! store body (= done? "true"))
+                   loc (format "%s://%s:%d/todos/%s" (name scheme) host port id)]
+               (response/redirect-after-post loc)))
    (route/not-found "not here")))
 
 (defn wrap-logging
