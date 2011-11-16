@@ -47,3 +47,10 @@
   (when (contains? @store id)
     (dosync
      (alter store dissoc id))))
+
+(defn update-todo!
+  "Updates todo note"
+  [store id todo]
+  (when (contains? @store id)
+    (dosync
+     (alter store assoc id todo))))

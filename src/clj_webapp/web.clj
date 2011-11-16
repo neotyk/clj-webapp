@@ -42,6 +42,17 @@
                  (response/response "")
                  (response/status (response/response (str "Failed to remove " id))
                                   404)))
+   (web/PUT "/todos/:id" {{id :id} :route-params
+                          {body "todo[body]"
+                           done? "todo[isDone]"
+                           :as params} :form-params
+                           :as req}
+            (log/info req)
+            (if (core/update-todo! store id {:body body
+                                             :isDone (= done? "true")})
+              (response/response "")
+              (response/status (response/response (str "Failed to update " id))
+                               404)))
    (route/not-found "not here")))
 
 (defn wrap-logging
