@@ -12,7 +12,6 @@
             [clojure.tools.logging :as log]))
 
 (def *SERVER* (ref nil))
-(def *STORE* nil)
 
 (defn todos-handler [store]
   (web/routes
@@ -40,7 +39,7 @@
         (log/warn (str "Failed request: " (format "[IP: %s] %s %s" remote-addr request-method uri) ", error: " (.getMessage e)))
         (throw e)))))
 
-(def app (handler/site (-> (todos-handler *STORE*)
+(def app (handler/site (-> (todos-handler (core/get-store))
                            (file/wrap-file "static")
                            file-info/wrap-file-info
                            wrap-logging)))
@@ -51,6 +50,7 @@
                                   :join? false})]
     (dosync
      (ref-set *SERVER* s)))
+  (core/populate-initial-dataset)
   (swank/start-repl 4005))
 
 (defn stop-server []
