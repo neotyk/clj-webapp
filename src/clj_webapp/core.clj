@@ -31,7 +31,7 @@
   [store body done?]
   (let [id (str (UUID/randomUUID))]
     (dosync
-     (alter *STORE* assoc
+     (alter store assoc
             id {:body body :isDone done? }))
     id))
 
